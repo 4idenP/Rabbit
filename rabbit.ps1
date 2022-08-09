@@ -74,8 +74,9 @@ While ($loop){
                         Write-Host -NoNewLine "] FOUND : $firstboundary"
                         Write-Host -NoNewLine "$id" -BackgroundColor green
                         Write-Host -NoNewline "$lastboundary"
-                        Write-Host "`n"
+                        Write-Host ""
                         if ($RESEARCHMODE -eq 1){
+                            Write-Host "`n"
                             $exit = 1 
                             $optionEnd = Read-Host -Prompt '     Exit program ? (y/n) '
                             if ($optionEnd -like "*y*") {
@@ -93,6 +94,18 @@ While ($loop){
                 }
             }
         }
+        Write-Host "`n"
+        $optionEnd = Read-Host -Prompt '     Exit program ? (y/n) '
+            if ($optionEnd -like "*y*") {
+                $loop = $false
+                Break main
+            } elseif ($optionEnd -like "*n*") {
+                $loop = $true
+                Break main
+            } else {
+                $loop = $false
+                Break main
+            }
 
     } elseif ($option -eq 3) {
         Foreach ($i in $(Get-Content config.psd1)){
