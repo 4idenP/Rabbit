@@ -98,13 +98,10 @@ While ($loop){
         $optionEnd = Read-Host -Prompt '     Exit program ? (y/n) '
             if ($optionEnd -like "*y*") {
                 $loop = $false
-                Break main
             } elseif ($optionEnd -like "*n*") {
                 $loop = $true
-                Break main
             } else {
                 $loop = $false
-                Break main
             }
 
     } elseif ($option -eq 3) {
