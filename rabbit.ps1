@@ -30,8 +30,10 @@ function Update-Config { #REFRESH CONFIG
         $Global:CMODE = @{ Object = 'No'; ForegroundColor = 'red' }
     }
     if($VERBOSE -eq 1){
-        $Global:VMODE = @{ Object = 'Yes'; ForegroundColor = 'green' }
-    } else {
+        $Global:VMODE = @{ Object = 'Low'; ForegroundColor = 'darkyellow' }
+    } elseif($VERBOSE -eq 2){
+        $Global:VMODE = @{ Object = 'High'; ForegroundColor = 'green' }
+    } elseif($VERBOSE -eq 0){
         $Global:VMODE = @{ Object = 'No'; ForegroundColor = 'red' }
     }
 }
@@ -41,6 +43,19 @@ function Update-ConfigValue($VAR, $VARNAME) { #CHANGE A VALUE IN THE CONFIG
         if ($VAR -eq 0) {
             $_ -replace "$VARNAME=.*", "$VARNAME=1" 
         } else {
+            $_ -replace "$VARNAME=.*", "$VARNAME=0" 
+        }
+    } | Set-Content .\config.psd1
+    Update-Config
+}
+
+function Update-ConfigValue-Verbose($VAR, $VARNAME) { #CHANGE A VALUE IN THE CONFIG
+    (Get-Content .\config.psd1) | Foreach-Object {
+        if ($VAR -eq 0) {
+            $_ -replace "$VARNAME=.*", "$VARNAME=1" 
+        } elseif ($VAR -eq 1) {
+            $_ -replace "$VARNAME=.*", "$VARNAME=2" 
+        } elseif ($VAR -eq 2) {
             $_ -replace "$VARNAME=.*", "$VARNAME=0" 
         }
     } | Set-Content .\config.psd1
@@ -64,14 +79,19 @@ function Browse-Files($FOLDERPATH) {
                 $nbr = 1
                 try {
                     :main foreach($line in [System.IO.File]::ReadLines("$_")) { 
+                        if($VERBOSE -eq 2){
+                            Write-Host "     [~] $_" -ForegroundColor yellow    
+                        }
                         if($CASESENSITIVEMODE -eq 1){
                             if($line -clike "*$id*"){
-                                if($VERBOSE -eq 1){
+                                if($VERBOSE -ge 1){
                                     $index = $line.IndexOf("$id")
                                     $firstboundary = $line.SubString(0,$index)
                                     $lineLength = $line.Length - ($index+$id.Length)
                                     $lastboundary = $line.SubString($secondIndex, $lineLength)
-                                    Write-Host "     [~] $_" -ForegroundColor yellow
+                                    if($VERBOSE -lt 2){
+                                        Write-Host "     [~] $_" -ForegroundColor yellow
+                                    }
                                     Write-Host -NoNewLine "      | ["
                                     Write-Host -NoNewLine "+" -ForegroundColor green
                                     Write-Host -NoNewLine "] (Line $nbr) FOUND : $firstboundary"
@@ -93,12 +113,14 @@ function Browse-Files($FOLDERPATH) {
                             }
                         } elseif($CASESENSITIVEMODE -eq 0){
                             if($line -like "*$id*"){
-                                if($VERBOSE -eq 1){
+                                if($VERBOSE -ge 1){
                                     $index = $line.IndexOf("$id", [System.StringComparison]::CurrentCultureIgnoreCase)
                                     $firstboundary = $line.SubString(0,$index)
                                     $lineLength = $line.Length - ($index+$id.Length)
                                     $lastboundary = $line.SubString($secondIndex, $lineLength)
-                                    Write-Host "     [~] $_" -ForegroundColor yellow
+                                    if($VERBOSE -lt 2){
+                                        Write-Host "     [~] $_" -ForegroundColor yellow
+                                    }
                                     Write-Host -NoNewLine "      | ["
                                     Write-Host -NoNewLine "+" -ForegroundColor green
                                     Write-Host -NoNewLine "] (Line $nbr) FOUND : $firstboundary"
@@ -216,7 +238,7 @@ While ($loop){
     } if ($option -like "*3*") {
         Update-ConfigValue $CASESENSITIVEMODE "CASESENSITIVEMODE"
     } if ($option -like "*4*") {
-        Update-ConfigValue $VERBOSE "VERBOSE"
+        Update-ConfigValue-Verbose $VERBOSE "VERBOSE"
     } if ($option -like "*5*"){
         Invoke-Item "./config.psd1"
     } if ($option -like "*6*") {
