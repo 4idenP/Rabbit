@@ -4,11 +4,6 @@ $scriptpath = $MyInvocation.MyCommand.Path
 $scriptpath = $scriptpath -replace $MyInvocation.MyCommand.Name, ""
 Set-Location $scriptpath
 
-#INFO
-#
-# Estimated at an average speed of 204.000 lines/s
-#
-
 #FUNCTIONS
 
 function Update-Config { #REFRESH CONFIG
@@ -157,6 +152,7 @@ function Browse-Files($FOLDERPATH) {
 }
 
 #PROCESSING
+
 While ($loop){
  
     $exit = 0
@@ -224,7 +220,7 @@ While ($loop){
         Recursive-Folder $RESEARCHDIR
 
         $EndTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
-        $TimeInterval = NEW-TIMESPAN –Start $StartTime –End $EndTime
+        $TimeInterval = NEW-TIMESPAN Â–Start $StartTime Â–End $EndTime
         $TotalSeconds = $TimeInterval.TotalSeconds
         $SearchRate = $Global:TotalLines / $TotalSeconds
 
