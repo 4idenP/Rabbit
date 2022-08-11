@@ -152,7 +152,6 @@ function Browse-Files($FOLDERPATH) {
 }
 
 #PROCESSING
-
 While ($loop){
  
     $exit = 0
@@ -220,7 +219,7 @@ While ($loop){
         Recursive-Folder $RESEARCHDIR
 
         $EndTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
-        $TimeInterval = NEW-TIMESPAN Â–Start $StartTime Â–End $EndTime
+        $TimeInterval = NEW-TIMESPAN –Start $StartTime –End $EndTime
         $TotalSeconds = $TimeInterval.TotalSeconds
         $SearchRate = $Global:TotalLines / $TotalSeconds
 
