@@ -7,7 +7,7 @@ RABBIT is a powershell-coded tool designed to help user find a substring inside 
 
 ## Supported files extensions
 
-The current files supported are : .txt, .json, .bat, .vbs, .csv
+The current files supported are : ```.txt```, ```.json```, ```.bat```, ```.vbs```, ```.csv```
 The following aren't supported yet but will be in the future : 
-> .pdf, .xlsx
+> ```.pdf```, ```.xlsx```
 
