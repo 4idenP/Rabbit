@@ -63,6 +63,7 @@ function Update-ConfigValue-Verbose($VAR, $VARNAME) { #CHANGE A VALUE IN THE CON
 }
 
 function Recursive-Folder($ORIGINPATH) {
+    $Global:totalLines = 0
     Get-ChildItem -Path $ORIGINPATH -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object -Process {
        $completePath = "$ORIGINPATH\$_\"
        if(($_ -ne "") -and ($completepath -ne $scriptpath) -and $RECURSIVEMODE -eq 1) {
@@ -78,32 +79,35 @@ function Browse-Files($FOLDERPATH) {
             if($exit -eq 0) {
                 $nbr = 1
                 try {
+                    if($VERBOSE -eq 2){
+                        Write-Host "     [~] $_" -ForegroundColor yellow    
+                    }
                     :main foreach($line in [System.IO.File]::ReadLines("$_")) { 
-                        if($VERBOSE -eq 2){
-                            Write-Host "     [~] $_" -ForegroundColor yellow    
-                        }
                         if($CASESENSITIVEMODE -eq 1){
                             if($line -clike "*$id*"){
                                 if($VERBOSE -ge 1){
                                     $index = $line.IndexOf("$id")
                                     $firstboundary = $line.SubString(0,$index)
                                     $lineLength = $line.Length - ($index+$id.Length)
-                                    $lastboundary = $line.SubString($secondIndex, $lineLength)
+                                    $lastboundary = $line.SubString($index+$id.Length, $lineLength)
                                     if($VERBOSE -lt 2){
                                         Write-Host "     [~] $_" -ForegroundColor yellow
                                     }
                                     Write-Host -NoNewLine "      | ["
                                     Write-Host -NoNewLine "+" -ForegroundColor green
-                                    Write-Host -NoNewLine "] (Line $nbr) FOUND : $firstboundary"
-                                    Write-Host -NoNewLine "$id" -BackgroundColor green
-                                    Write-Host -NoNewline "$lastboundary"
+                                    Write-Host -NoNewLine "] FOUND (Line $nbr) :"
+                                    $CharArray = $line -Split ($id)
+                                    for($x=0; $x -lt $CharArray.length; $x=$x+1) {
+                                        Write-Host -NoNewLine $CharArray[$x]
+                                        if($x -lt ($CharArray.length - 1)){Write-Host -NoNewLine "$id" -Backgroundcolor green}
+                                    }
                                     Write-Host ""
+                                } elseif($VERBOSE -lt 1) {
+                                    Add-Content "$scriptpath\$time.txt" ""
+                                    Add-Content "$scriptpath\$time.txt" "[~] $_"
+                                    Add-Content "$scriptpath\$time.txt" " | [+] (Line $nbr) FOUND : $line"
+                                    Add-Content "$scriptpath\$time.txt" ""
                                 }
-                                Add-Content "$scriptpath\$time.txt" ""
-                                Add-Content "$scriptpath\$time.txt" "[~] $_"
-                                Add-Content "$scriptpath\$time.txt" " | [+] (Line $nbr) FOUND : $line"
-                                $sep = "=" * ($line.Length + 23 + $nbr.tostring().length)
-                                Add-Content "$scriptpath\$time.txt" "$sep"
                                 $Global:hasFound = $true
                                 $Global:occurencesFound++
                                 if ($RESEARCHMODE -eq 1){
@@ -117,22 +121,25 @@ function Browse-Files($FOLDERPATH) {
                                     $index = $line.IndexOf("$id", [System.StringComparison]::CurrentCultureIgnoreCase)
                                     $firstboundary = $line.SubString(0,$index)
                                     $lineLength = $line.Length - ($index+$id.Length)
-                                    $lastboundary = $line.SubString($secondIndex, $lineLength)
+                                    $lastboundary = $line.SubString($index+$id.Length, $lineLength)
                                     if($VERBOSE -lt 2){
                                         Write-Host "     [~] $_" -ForegroundColor yellow
                                     }
                                     Write-Host -NoNewLine "      | ["
                                     Write-Host -NoNewLine "+" -ForegroundColor green
-                                    Write-Host -NoNewLine "] (Line $nbr) FOUND : $firstboundary"
-                                    Write-Host -NoNewLine "$id" -BackgroundColor green
-                                    Write-Host -NoNewline "$lastboundary"
+                                    Write-Host -NoNewLine "] FOUND (Line $nbr) : "
+                                    $CharArray = $line -Split ($id)
+                                    for($x=0; $x -lt $CharArray.length; $x=$x+1) {
+                                        Write-Host -NoNewLine $CharArray[$x]
+                                        if($x -lt ($CharArray.length - 1)){Write-Host -NoNewLine "$id" -Backgroundcolor green}
+                                    }
                                     Write-Host ""
+                                } elseif($VERBOSE -lt 1) {
+                                    Add-Content "$scriptpath\$time.txt" ""
+                                    Add-Content "$scriptpath\$time.txt" "[~] $_"
+                                    Add-Content "$scriptpath\$time.txt" " | [+] (Line $nbr) FOUND : $line"
+                                    Add-Content "$scriptpath\$time.txt" ""
                                 }
-                                Add-Content "$scriptpath\$time.txt" ""
-                                Add-Content "$scriptpath\$time.txt" "[~] $_"
-                                Add-Content "$scriptpath\$time.txt" " | [+] (Line $nbr) FOUND : $line"
-                                $sep = "=" * ($line.Length + 23 + $nbr.tostring().length)
-                                Add-Content "$scriptpath\$time.txt" "$sep"
                                 $Global:hasFound = $true
                                 $Global:occurencesFound++
                                 if ($RESEARCHMODE -eq 1){
@@ -144,12 +151,12 @@ function Browse-Files($FOLDERPATH) {
                         $nbr = $nbr + 1
                     }
                 } catch {}
+                $Global:totalLines = $Global:totalLines + $nbr
             }
         }
 }
 
 #PROCESSING
-
 While ($loop){
  
     $exit = 0
@@ -212,15 +219,24 @@ While ($loop){
         $Global:hasFound = $false
         $Global:occurencesFound = 0
 
+        $StartTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
+
         Recursive-Folder $RESEARCHDIR
+
+        $EndTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
+        $TimeInterval = NEW-TIMESPAN –Start $StartTime –End $EndTime
+        $TotalSeconds = $TimeInterval.TotalSeconds
+        $SearchRate = $Global:TotalLines / $TotalSeconds
 
         if(-Not $Global:hasFound) {
             Write-Host -NoNewLine "     NOTHING! " -ForegroundColor red
-            Write-Host -NoNewLine "has been found."
+            Write-Host -NoNewLine "has been found ($TimeInterval, $totalLines lines, $SearchRate lines/s)."
         } else { 
             Write-Host -NoNewLine "     DONE! " -ForegroundColor green
-            Write-Host -NoNewLine "$Global:occurencesFound occurences have been found."
-            Invoke-Item "./$time.txt"
+            Write-Host -NoNewLine "$Global:occurencesFound occurences have been found ($TimeInterval, $totalLines lines, $SearchRate lines/s)."
+            if($VERBOSE -lt 1) {    
+                Invoke-Item "./$time.txt"
+            }
         }
 
 
