@@ -5,3 +5,4 @@ RABBIT is a powershell-coded tool designed to help user find a substring inside 
 <img align="right" src=https://user-images.githubusercontent.com/67024413/184168831-79445e53-8375-48ba-97ee-7e7110d4d435.PNG height="150px">
 
 > The tool was designed for Windows 10 (64Bit) and has been tested for 5.1.19041.1682 version of PowerShell.
+![LAPIN](https://user-images.githubusercontent.com/67024413/184168996-d290891c-311d-4270-98f7-8572e42d5e3e.PNG)
