@@ -4,3 +4,8 @@
 
 RABBIT is a powershell-coded tool designed to help user find a substring inside big files and big sets of files thanks to a recursive option.
 > The tool was designed for Windows 10 (64Bit) and has been tested for 5.1.19041.1682 version of PowerShell.
+
+## Supported files extensions
+
+.txt
+
