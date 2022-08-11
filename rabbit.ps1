@@ -58,20 +58,20 @@ function Update-ConfigValue-Verbose($VAR, $VARNAME) { #CHANGE A VALUE IN THE CON
 }
 
 function Recursive-Folder($ORIGINPATH) {
-    $Global:totalLines = 0
-    Get-ChildItem -Path $ORIGINPATH -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object -Process {
-       $completePath = "$ORIGINPATH\$_\"
-       if(($_ -ne "") -and ($completepath -ne $scriptpath) -and $RECURSIVEMODE -eq 1) {
-				Recursive-Folder $ORIGINPATH\$_
-			} 
+    if($Global:exit -eq 0) {
+        Get-ChildItem -Path $ORIGINPATH -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object -Process {
+        $completePath = "$ORIGINPATH\$_\"
+        if(($_ -ne "") -and ($completepath -ne $scriptpath) -and $RECURSIVEMODE -eq 1) {
+				    Recursive-Folder $ORIGINPATH\$_
+			    } 
+        }
+        Browse-Files "$ORIGINPATH"
     }
-    Browse-Files "$ORIGINPATH"
 }
 
 function Browse-Files($FOLDERPATH) {
-    $exit = 0
     Get-ChildItem -Path "$FOLDERPATH\*.txt" | ForEach-Object -Process { #SEARCH FUNC INTO FOLDER 
-            if($exit -eq 0) {
+            if($Global:exit -eq 0) {
                 $nbr = 1
                 try {
                     if($VERBOSE -eq 2){
@@ -106,7 +106,7 @@ function Browse-Files($FOLDERPATH) {
                                 $Global:hasFound = $true
                                 $Global:occurencesFound++
                                 if ($RESEARCHMODE -eq 1){
-                                    $exit = 1
+                                    $Global:exit = 1
                                     Break main
                                 }
                             }
@@ -138,7 +138,7 @@ function Browse-Files($FOLDERPATH) {
                                 $Global:hasFound = $true
                                 $Global:occurencesFound++
                                 if ($RESEARCHMODE -eq 1){
-                                    $exit = 1
+                                    $Global:exit = 1
                                     Break main
                                 }
                             }
@@ -151,51 +151,66 @@ function Browse-Files($FOLDERPATH) {
         }
 }
 
+function Prompt(){
+        Update-Config
+
+        Write-Host "========================================================================================================================`n"
+        Write-Host '       "               /|      __                    "                       +                   .   '
+        Write-Host ' *        "    +      / |   ,-~ /             +    "                 .                  .           '
+        Write-Host '   "   .             Y :|  //  /                .         *"                 .                             .'
+        Write-Host '         .   "       | jj /( .^     *"                               +               +              '
+        Write-Host '                *   ^>-"~"-v"              .        *        .                                      . '
+        Write-Host '*    "              /       Y"                                            +                         '
+        Write-Host '    .     .   "    jo  o    |     .            +"                   .                  .            '
+        Write-Host -NoNewLine '     "            ( ~'
+        Write-Host -NoNewLine 'T' -ForegroundColor magenta 
+        Write-Host -NoNewLine '~     j                     +     ."                    .                 +    '
+        Write-Host ""
+        Write-Host '        +    "     >._-~ _./         +"                                                                      .'
+        Write-Host '  "             /| :-~~ _  l"                               .                   .                   .'
+        Write-Host '   .           / l/ ,-"~    \     +                                       +              +          '
+        Write-Host '               \//\/      .- \               +                                                      '
+        Write-Host '        +       Y        /    Y"                   ___    _   ___ ___      _____                           "+'
+        Write-Host -NoNewLine '                l       I     !"                  | _ \  /_\ | _ ) _ )'
+        Write-Host -NoNewLine '_' -ForegroundColor DarkYellow
+        Write-Host -NoNewLine '\/' -ForegroundColor green
+        Write-Host -NoNewLine '_' -ForegroundColor DarkYellow
+        Write-Host -NoNewLine '|_   _|   "     +          '
+        Write-Host ""
+        Write-Host -NoNewLine '           "    ]\      _\    /~\                 |   / / _ \| _ \ _ \'
+        Write-Host -NoNewLine '\  /' -ForegroundColor DarkYellow
+        Write-Host -NoNewLine '  | |                   "  +'
+        Write-Host ""
+        Write-Host -NoNewLine '     "         (~ ~----( ~   Y.  )         +      |_|_\/_/ \_\___/___/ '
+        Write-Host -NoNewLine '\/' -ForegroundColor DarkYellow
+        Write-Host -NoNewLine '   |_|        "             .'
+        Write-Host ""
+        Write-Host '           ~~~~~~~~~~~~~~~~~~~~~~~~~~                                                               ' -ForegroundColor green
+        Write-Host '                                          Research Assistant for Big Big Information Tables'
+        Write-Host "`n========================================================================================================================`n"
+        Write-Host "   1 - Switch mode                     4 - Switch Verbose (Slow)               7 - Exit"
+        Write-Host "   2 - Switch recursive                5 - Open config"
+        Write-Host "   3 - Switch case-sensitive           6 - Change research directory`n"
+        Write-Host -NoNewLine "   Ready to be launched! (Single = "
+        Write-Host -NoNewLine @UMODE
+        Write-Host -NoNewLine ", Recursive = "
+        Write-Host -NoNewLine @RMODE
+        Write-Host -NoNewLine ", Case-sensitive = "
+        Write-Host -NoNewLine @CMODE
+        Write-Host -NoNewLine ", Verbose = "
+        Write-Host -NoNewLine @VMODE
+        Write-Host -NoNewLine ", Path = "
+        Write-Host -NoNewLine $RESEARCHDIR -ForegroundColor yellow
+        Write-Host -NoNewLine ")" 
+        Write-Host "`n"
+        $option = Read-Host -Prompt '    - Input (Press 0 to launch) '
+        return $option
+}
+
 #PROCESSING
 While ($loop){
  
-    $exit = 0
-    Update-Config
-
-    Write-Host "========================================================================================================================`n"
-    Write-Host '       "               /|      __                    "                       +                   .   '
-    Write-Host ' *        "    +      / |   ,-~ /             +    "                 .                  .           '
-    Write-Host '   "   .             Y :|  //  /                .         *"                 .                             .'
-    Write-Host '         .   "       | jj /( .^     *"                               +               +              '
-    Write-Host '                *   ^>-"~"-v"              .        *        .                                      . '
-    Write-Host '*    "              /       Y"                                            +                         '
-    Write-Host '    .     .   "    jo  o    |     .            +"                   .                  .            '
-    Write-Host -NoNewLine '     "            ( ~'
-    Write-Host -NoNewLine 'T' -ForegroundColor magenta
-    Write-Host -NoNewLine '~     j                     +     ."                    .                 +    '
-    Write-Host ""
-    Write-Host '        +    "     >._-~ _./         +"                                                                      .'
-    Write-Host '  "             /| :-~~ _  l"                               .                   .                   .'
-    Write-Host '   .           / l/ ,-"~    \     +                                       +              +          '
-    Write-Host '               \//\/      .- \               +                                                      '
-    Write-Host '        +       Y        /    Y"                   ___    _   ___ ___ ___ _____                           "+'
-    Write-Host '                l       I     !"                  | _ \  /_\ | _ ) _ )_ _|_   _|   "     +          '
-    Write-Host '           "    ]\      _\    /~\                 |   / / _ \| _ \ _ \| |  | |                   "  +'
-    Write-Host '     "         (~ ~----( ~   Y.  )         +      |_|_\/_/ \_\___/___/___| |_|        "             .'
-    Write-Host '           ~~~~~~~~~~~~~~~~~~~~~~~~~~                                                               ' -ForegroundColor green
-    Write-Host '                                          Research Assistant for Big Big Information Tables'
-    Write-Host "`n========================================================================================================================`n"
-    Write-Host "   1 - Switch mode                     4 - Switch Verbose (Slow)               0 - Exit"
-    Write-Host "   2 - Switch recursive                5 - Open config"
-    Write-Host "   3 - Switch case-sensitive           6 - Change research directory`n"
-    Write-Host -NoNewLine "   Ready to be launched! (Single = "
-    Write-Host -NoNewLine @UMODE
-    Write-Host -NoNewLine ", Recursive = "
-    Write-Host -NoNewLine @RMODE
-    Write-Host -NoNewLine ", Case-sensitive = "
-    Write-Host -NoNewLine @CMODE
-    Write-Host -NoNewLine ", Verbose = "
-    Write-Host -NoNewLine @VMODE
-    Write-Host -NoNewLine ", Path = "
-    Write-Host -NoNewLine $RESEARCHDIR -ForegroundColor yellow
-    Write-Host -NoNewLine ")" 
-    Write-Host "`n"
-    $option = Read-Host -Prompt '    - Input (Press enter to launch) '
+    $option = Prompt
 
     if ($option -eq "") {
         Update-Config
@@ -213,7 +228,8 @@ While ($loop){
 
         $Global:hasFound = $false
         $Global:occurencesFound = 0
-
+        $Global:totalLines = 0
+        $Global:exit = 0
         $StartTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
 
         Recursive-Folder $RESEARCHDIR
@@ -225,10 +241,10 @@ While ($loop){
 
         if(-Not $Global:hasFound) {
             Write-Host -NoNewLine "     NOTHING! " -ForegroundColor red
-            Write-Host -NoNewLine "has been found ($TimeInterval, $totalLines lines, $SearchRate lines/s)."
+            Write-Host -NoNewLine "has been found ($TimeInterval, $Global:TotalLines lines, $SearchRate lines/s)."
         } else { 
             Write-Host -NoNewLine "     DONE! " -ForegroundColor green
-            Write-Host -NoNewLine "$Global:occurencesFound occurences have been found ($TimeInterval, $totalLines lines, $SearchRate lines/s)."
+            Write-Host -NoNewLine "$Global:occurencesFound occurences have been found ($TimeInterval, $Global:TotalLines lines, $SearchRate lines/s)."
             if($VERBOSE -lt 1) {    
                 Invoke-Item "./$time.txt"
             }
@@ -263,10 +279,8 @@ While ($loop){
         }
         $NewResearchDir = GetResearchFolder($RESEARCHDIR)
         (Get-Content .\config.psd1) | Foreach-Object { $_ -replace 'RESEARCHDIR=.*', "RESEARCHDIR=$NewResearchDir" } | Set-Content .\config.psd1
-        Foreach ($i in $(Get-Content config.psd1)){
-            Set-Variable -Name $i.split("=")[0] -Value $i.split("=",2)[1]
-        }
-    } if (($option -like "q" ) -or ($option -like "0" ) -or ($option -like "e" )){
+        Update-Config
+    } if (($option -like "q" ) -or ($option -like "7" ) -or ($option -like "e" )){
         $loop = $false
     } 
     cls
