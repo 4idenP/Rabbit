@@ -221,10 +221,12 @@ While ($loop){
         Write-Host ""
 
         $time = Get-Date -Format "dd,MM,yyyy HH-mm-ss"
-        New-Item "$scriptpath\$time.txt" | Out-Null
-        Add-Content "$scriptpath\$time.txt" "RABBIT V2.2 OUTPUT | Expression : $id"
-        $sepHead = "=" * (34 + $id.Length)
-        Add-Content "$scriptpath\$time.txt" "$sepHead"
+        if($VERBOSE -lt 1) {    
+            New-Item "$scriptpath\$time.txt" | Out-Null
+            Add-Content "$scriptpath\$time.txt" "RABBIT V2.2 OUTPUT | Expression : $id"
+            $sepHead = "=" * (34 + $id.Length)
+            Add-Content "$scriptpath\$time.txt" "$sepHead" 
+        }
 
         $Global:hasFound = $false
         $Global:occurencesFound = 0
