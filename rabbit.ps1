@@ -70,7 +70,7 @@ function Recursive-Folder($ORIGINPATH) {
 }
 
 function Browse-Files($FOLDERPATH) {
-    Get-ChildItem -Path "$FOLDERPATH\*.txt" | ForEach-Object -Process { #SEARCH FUNC INTO FOLDER 
+    Get-ChildItem -Path "$FOLDERPATH\*.*" | ForEach-Object -Process { #SEARCH FUNC INTO FOLDER 
             if($Global:exit -eq 0) {
                 $nbr = 1
                 try {
@@ -237,7 +237,7 @@ While ($loop){
         Recursive-Folder $RESEARCHDIR
 
         $EndTime=(GET-DATE -Format "dd/MM/yyyy HH:mm:ss")
-        $TimeInterval = NEW-TIMESPAN –Start $StartTime –End $EndTime
+        $TimeInterval = NEW-TIMESPAN Â–Start $StartTime Â–End $EndTime
         $TotalSeconds = $TimeInterval.TotalSeconds
         $SearchRate = $Global:TotalLines / $TotalSeconds
 
